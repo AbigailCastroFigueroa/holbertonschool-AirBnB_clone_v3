@@ -22,7 +22,7 @@ def status():
 def class_objects_count():
     """Give you the amount of objects created per class."""
     dic = {
-        "amenity": storage.count(Amenity),
+        "amenities": storage.count(Amenity),
         "cities": storage.count(City),
         "places": storage.count(Place),
         "reviews": storage.count(Review),
