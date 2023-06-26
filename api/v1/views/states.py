@@ -7,29 +7,23 @@ from models import storage
 from models.state import State
 
 
-@app_views.route('/states', methods=['GET'], strict_slashes=False)
+@app_views.route('/states', methods=['GET', 'POST'], strict_slashes=False)
 def get_states():
-    """get state information for all states"""
+    """ focus on all the state object """
+
+    if request.method == 'POST':
+        data = request.get_json()
+        if not data:
+            return Response("Not a JSON", 400)
+        if 'name' not in data:
+            return Response("Missing name", 400)
+        state = State(name=data.get('name'))
+        state.save()
+        return jsonify(state.to_dict()), 201
+
+    all_states = storage.all('State')
     states = []
-    for state in storage.all("State").values():
+
+    for state in all_states.values():
         states.append(state.to_dict())
     return jsonify(states)
-
-
-@app_views.route('/api/v1/states/<state_id>', methods=['GET'])
-def get_state(state_id):
-    state = storage.get(State, state_id)
-    if not state:
-        abort(404)
-    return jsonify(state.to_dict())
-
-
-@app_views.route('/api/v1/states/<state_id>', methods=['DELETE'])
-def delete_state(state_id):
-    state = storage.get(State, state_id)
-    if not state:
-        abort(404)
-    storage.delete(state)
-    storage.save()
-    return jsonify({}), 200
-
