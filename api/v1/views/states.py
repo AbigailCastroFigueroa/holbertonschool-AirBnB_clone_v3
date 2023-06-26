@@ -17,7 +17,7 @@ def get_states():
 
 
 @app_views.route('/states/<string:state_id>', methods=['GET'],
-                strict_slashes=False)
+    strict_slashes=False)
 def get_state(state_id):
     """get state information for specified state"""
     state = storage.get("State", state_id)
