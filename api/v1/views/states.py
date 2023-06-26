@@ -22,7 +22,7 @@ def get_state(state_id):
         abort(404)
     return jsonify(state.to_dict())
 
-@app.route('/api/v1/states/<state_id>', methods=['DELETE'])
+@app_views.route('/api/v1/states/<state_id>', methods=['DELETE'])
 def delete_state(state_id):
     """deletes a state based on its state_id"""
     state = storage.get(State, state_id)
