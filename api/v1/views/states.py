@@ -2,7 +2,7 @@
 """Creating a new view for State objects."""
 
 from api.v1.views import app_views
-from flask import abort, jsonify
+from flask import abort, jsonify, request, make_response
 from models import storage
 from models.state import State
 
@@ -33,8 +33,9 @@ def delete_state(state_id):
     storage.delete(state)
     storage.save()
     return jsonify({}), 200
-
-@app_views.route('/states/', methods=['POST'], strict_slashes=False)
+    
+    
+@app_views.route('/states/<state_id>', methods=['POST'], strict_slashes=False)
 def post_state():
     """create a new state"""
     if not request.get_json():
