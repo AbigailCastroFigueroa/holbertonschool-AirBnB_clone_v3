@@ -9,6 +9,7 @@ users_bp = Blueprint('users', __name__)
 
 users = []
 
+
 class User:
     def __init__(self, email, password):
         self.id = len(users) + 1
@@ -26,10 +27,12 @@ class User:
             'updated_at': self.updated_at.isoformat()
         }
 
+
 @users_bp.route('/api/v1/users', methods=['GET'])
 def get_all_users():
     """Retrieves the list of all User objects"""
     return jsonify([user.to_dict() for user in users])
+
 
 @users_bp.route('/api/v1/users/<int:user_id>', methods=['GET'])
 def get_user(user_id):
@@ -39,6 +42,7 @@ def get_user(user_id):
         abort(404)
     return jsonify(user.to_dict())
 
+
 @users_bp.route('/api/v1/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     """Deletes a User object"""
@@ -47,6 +51,7 @@ def delete_user(user_id):
         abort(404)
     users.remove(user)
     return jsonify({}), 200
+
 
 @users_bp.route('/apDeletes a User objecti/v1/users', methods=['POST'])
 def create_user():
@@ -61,6 +66,7 @@ def create_user():
     user = User(data['email'], data['password'])
     users.append(user)
     return jsonify(user.to_dict()), 201
+
 
 @users_bp.route('/api/v1/users/<int:user_id>', methods=['PUT'])
 def update_user(user_id):
