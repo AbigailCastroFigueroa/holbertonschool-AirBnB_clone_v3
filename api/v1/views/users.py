@@ -1,7 +1,5 @@
 #!/usr/bin/python3
-'''
-users handler
-'''
+"""Users handler"""
 from flask import Flask, make_response, request, jsonify, abort
 from api.v1.views import app_views
 from models import storage
@@ -11,11 +9,6 @@ from models.user import User
 
 @app_views.route('/users', methods=['GET', 'POST'])
 def all_users():
-    '''
-    all users GET & POST methods
-    get returns all users
-    post adds user object and saves it
-    '''
     if request.method == 'GET':
         return jsonify([user.to_dict()
                         for user in storage.all('User').values()])
@@ -35,13 +28,6 @@ def all_users():
 
 @app_views.route('/users/<user_id>', methods=['GET', 'DELETE', 'PUT'])
 def user(user_id):
-    '''
-    GET / DELETE/ PUT method for User w/ specific ID
-    if user_id passed doesnt exist, 404 error
-    GET - returns specific user object
-    DELETE - removes objecty
-    PUT - updates object
-    '''
     user = storage.get('User', user_id)
 
     if not user:
