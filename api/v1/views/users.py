@@ -1,88 +1,65 @@
 #!/usr/bin/python3
-"""Create a new view for User object that handles
-all default RESTFul API actions."""
-
-from flask import Blueprint, jsonify, request, abort
-from datetime import datetime
-
-users_bp = Blueprint('users', __name__)
-
-users = []
-
-
-class User:
-    def __init__(self, email, password):
-        self.id = len(users) + 1
-        self.email = email
-        self.password = password
-        self.name = f"User {self.id}"
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'email': self.email,
-            'password': self.password,
-            'name': self.name,
-            'created_at': self.created_at.isoformat(),
-            'updated_at': self.updated_at.isoformat()
-        }
+'''
+users handler
+'''
+from flask import Flask, make_response, request, jsonify, abort
+from api.v1.views import app_views
+from models import storage
+from models.state import State
+from models.user import User
 
 
-@users_bp.route('/api/v1/users', methods=['GET'])
-def get_all_users():
-    """Retrieves the list of all User objects"""
-    return jsonify(users=[user.to_dict() for user in users]),\
-        200, {'Content-Type': 'application/json'}
+@app_views.route('/users', methods=['GET', 'POST'])
+def all_users():
+    '''
+    all users GET & POST methods
+    get returns all users
+    post adds user object and saves it
+    '''
+    if request.method == 'GET':
+        return jsonify([user.to_dict()
+                        for user in storage.all('User').values()])
+    if request.method == 'POST':
+
+        if not request.get_json():
+            abort(400, 'Not a JSON')
+        if 'email' not in request.get_json():
+            abort(400, "Missing email")
+        if 'password' not in request.get_json():
+            abort(400, "Missing password")
+        new_User = User(**request.get_json())
+        new_User.save()
+
+        return make_response(jsonify(new_User.to_dict()), 201)
 
 
-@users_bp.route('/api/v1/users/<int:user_id>', methods=['GET'])
-def get_user(user_id):
-    """Retrieves a User object"""
-    user = next((user for user in users if user.id == user_id), None)
-    if user is None:
+@app_views.route('/users/<user_id>', methods=['GET', 'DELETE', 'PUT'])
+def user(user_id):
+    '''
+    GET / DELETE/ PUT method for User w/ specific ID
+    if user_id passed doesnt exist, 404 error
+    GET - returns specific user object
+    DELETE - removes objecty
+    PUT - updates object
+    '''
+    user = storage.get('User', user_id)
+
+    if not user:
         abort(404)
-    return jsonify(user.to_dict())
 
+    if request.method == 'GET':
+        return make_response(jsonify(user.to_dict()), 200)
 
-@users_bp.route('/api/v1/users/<int:user_id>', methods=['DELETE'])
-def delete_user(user_id):
-    """Deletes a User object"""
-    user = next((user for user in users if user.id == user_id), None)
-    if user is None:
-        abort(404)
-    users.remove(user)
-    return jsonify({}), 200
+    if request.method == 'DELETE':
+        storage.delete(user)
+        storage.save()
+        return make_response(jsonify({}), 200)
 
-
-@users_bp.route('/apDeletes a User objecti/v1/users', methods=['POST'])
-def create_user():
-    """Creates a User"""
-    data = request.get_json()
-    if data is None:
-        abort(400, 'Not a JSON')
-    if 'email' not in data:
-        abort(400, 'Missing email')
-    if 'password' not in data:
-        abort(400, 'Missing password')
-    user = User(data['email'], data['password'])
-    users.append(user)
-    return jsonify(user.to_dict()), 201
-
-
-@users_bp.route('/api/v1/users/<int:user_id>', methods=['PUT'])
-def update_user(user_id):
-    """Updates a User object"""
-    user = next((user for user in users if user.id == user_id), None)
-    if user is None:
-        abort(404)
-    data = request.get_json()
-    if data is None:
-        abort(400, 'Not a JSON')
-    ignored_keys = ['id', 'email', 'created_at', 'updated_at']
-    for key, value in data.items():
-        if key not in ignored_keys:
-            setattr(user, key, value)
-    user.updated_at = datetime.now()
-    return jsonify(user.to_dict()), 200
+    if request.method == 'PUT':
+        if not request.json:
+            abort(400, "Not a JSON")
+        for key, value in request.get_json().items():
+            if key not in ["id", "email", "created_at", "updated_at"]:
+                setattr(user, key, value)
+        user.save()
+        return make_response(jsonify(user.to_dict()), 200)
