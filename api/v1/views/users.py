@@ -31,7 +31,8 @@ class User:
 @users_bp.route('/api/v1/users', methods=['GET'])
 def get_all_users():
     """Retrieves the list of all User objects"""
-    return jsonify(users=[user.to_dict() for user in users]), 200
+    return jsonify(users=[user.to_dict() for user in users]),\
+        200, {'Content-Type': 'application/json'}
 
 
 @users_bp.route('/api/v1/users/<int:user_id>', methods=['GET'])
