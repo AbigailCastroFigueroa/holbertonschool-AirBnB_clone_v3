@@ -15,6 +15,7 @@ class User:
         self.id = len(users) + 1
         self.email = email
         self.password = password
+        self.name = f"User {self.id}"
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
 
@@ -23,6 +24,7 @@ class User:
             'id': self.id,
             'email': self.email,
             'password': self.password,
+            'name': self.name,
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat()
         }
