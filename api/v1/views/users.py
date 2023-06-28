@@ -4,6 +4,7 @@ all default RESTFul API actions."""
 
 from flask import Blueprint, jsonify, request, abort
 from datetime import datetime
+from models import storage
 
 users_bp = Blueprint('users', __name__)
 
@@ -33,8 +34,10 @@ class User:
 @users_bp.route('/api/v1/users', methods=['GET'])
 def get_all_users():
     """Retrieves the list of all User objects"""
-    return jsonify(users=[user.to_dict() for user in users]),\
-        200, {'Content-Type': 'application/json'}
+    user = list(storage.all('User').values())
+    for user in users:
+        users.append(user.to_dict())
+    return jsonify(users)
 
 
 @users_bp.route('/api/v1/users/<int:user_id>', methods=['GET'])
