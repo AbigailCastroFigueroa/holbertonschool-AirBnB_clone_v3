@@ -57,19 +57,14 @@ def create_user():
 @app_views.route('/users/<user_id>/', methods=['PUT'], strict_slashes=False)
 def update_user(user_id):
     """Updates a User object"""
-    ignore = ['id', 'email', 'created_at', 'updated_at']
-    user = storage.get("User", user_id)
-    if user:
-        content = request.get_json(silent=True)
-        if isinstance(content, dict):
-            for key, value in content.items():
-                if key not in ignore:
-                    setattr(user, key, value)
-            storage.save()
-            return jsonify(user.to_dict()), 200
-        else:
-            response = jsonify({"error": "Not a JSON"})
-            response.status_code = 400
-            return response
-    else:
+    user = storage.get(User, user_id)
+    if not user:
         abort(404)
+    if not request.is_json:
+        abort(400, 'Not a JSON')
+    data = request.get_json()
+    for key, value in data.items():
+        if key not in ['id', 'email', 'created_at', 'updated_at']:
+            setattr(user, key, value)
+    storage.save()
+    return jsonify(user.to_dict()), 200
