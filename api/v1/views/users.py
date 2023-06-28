@@ -35,7 +35,7 @@ def delete_user(user_id):
     if user:
         storage.delete(user)
         storage.save()
-        return jsonify({})
+        return jsonify({}), 200
     else:
         abort(404)
 
@@ -76,7 +76,7 @@ def update_user(user_id):
                 if key not in ignore:
                     setattr(user, key, value)
             storage.save()
-            return jsonify(user.to_dict())
+            return jsonify(user.to_dict()), 200
         else:
             response = jsonify({"error": "Not a JSON"})
             response.status_code = 400
