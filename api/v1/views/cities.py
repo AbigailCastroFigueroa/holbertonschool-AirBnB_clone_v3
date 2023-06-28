@@ -19,7 +19,7 @@ def get_cities(state_id):
     return jsonify(cities)
 
 
-@app_views.route('/api/v1/cities/<city_id>', methods=['GET'],
+@app_views.route('/cities/<city_id>', methods=['GET'],
                  strict_slashes=False)
 def get_city(city_id):
     """get city information for specified city"""
