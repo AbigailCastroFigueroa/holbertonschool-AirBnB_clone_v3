@@ -2,7 +2,7 @@
 """Create a view for Amenity objects."""
 
 from api.v1.views import app_views
-from flask import abort, jsonify, request
+from flask import abort, jsonify, request, make_response
 from models import storage
 from models.amenity import Amenity
 
@@ -41,13 +41,26 @@ def delete_amenity(amenity_id):
 @app_views.route('/amenities', methods=['POST'], strict_slashes=False)
 def post_amenity():
     """Create a new Amenity object."""
-    if request.method == 'POST':
-        content = request.get_json()
-        if not content:
-            abort(400, 'Not a JSON')
-        if "name" not in content:
-            abort(400, 'Missing name')
-        new_amenity = Amenity(**content)
-        storage.new(new_amenity)
-        storage.save()
-        return jsonify(new_amenity), 201
+    if not request.is_json():
+        return make_response(jsonify(error="Not a JSON"), 400)
+    if 'name' not in request.get_json():
+        return make_response(jsonify(error="Missing name"), 400)
+    new_amenity = Amenity(**request.get_json())
+    storage.save()
+    return jsonify(new_amenity.to_dict()), 201
+
+
+@app_views.route('/amenities/<amenity_id>')
+def amenities_update(amenity_id):
+    """Update amenities attributes."""
+    selected_amenity = storage.get(Amenity, amenity_id)
+    if amenity_id not in selected_amenity:
+        abort(404)
+    if not request.is_json():
+        return make_response(jsonify(error="Not a JSON"), 400)
+    content = request.get_json()
+    for key, value in content.items():
+        if key not in ['id', 'created_at', 'updated_at']:
+            setattr(selected_amenity, key, value)
+    storage.save()
+    return jsonify(selected_amenity.to_dict()), 200
