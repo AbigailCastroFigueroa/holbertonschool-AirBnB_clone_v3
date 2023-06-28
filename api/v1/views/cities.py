@@ -59,7 +59,7 @@ def post_city(state_id):
 
 @app_views.route('api/v1/cities/<city_id>', methods=['PUT'],
                  strict_slashes=False)
-def update_city(city_id):
+def put_city(city_id):
     city = storage.get(City, city_id)
     if not city:
         abort(404)
