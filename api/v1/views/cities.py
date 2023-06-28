@@ -12,7 +12,7 @@ from models.state import State
                  strict_slashes=False)
 def get_cities(state_id):
     """get city information for all cities in a specified state"""
-    state = storage.get("State", state_id)
+    state = storage.get(State, state_id)
     if not state:
         abort(404)
     cities = []
@@ -25,14 +25,14 @@ def get_cities(state_id):
                  strict_slashes=False)
 def get_city(city_id):
     """get city information for specified city"""
-    city = storage.get("City", city_id)
+    city = storage.get(City, city_id)
     if not city:
         abort(404)
     return jsonify(city.to_dict())
 
 @app_views.route('/api/v1/cities/<city_id>', methods=['DELETE'])
 def delete_city(city_id):
-    city = storage.get("City", city_id)
+    city = storage.get(City, city_id)
     if not city:
         abort(404)
     storage.delete(city)
