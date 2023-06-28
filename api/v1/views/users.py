@@ -2,7 +2,7 @@
 """Create a new view for User object that handles
 all default RESTFul API actions."""
 
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request, abort, make_response
 from api.v1.views import app_views
 from models.user import User
 from models import storage
@@ -31,7 +31,7 @@ def get_user(user_id):
 @app_views.route('/users/<user_id>/', methods=['DELETE'], strict_slashes=False)
 def delete_user(user_id):
     """Deletes a User object"""
-    user = storage.get("User", user_id)
+    user = storage.get(User, user_id)
     if user:
         storage.delete(user)
         storage.save()
@@ -43,25 +43,15 @@ def delete_user(user_id):
 @app_views.route('/users/', methods=['POST'], strict_slashes=False)
 def create_user():
     """Creates a User"""
-    error_message = ""
-    content = request.get_json(silent=True)
-    if isinstance(content, dict):
-        if "email" not in content.keys():
-            error_message = "Missing email"
-        elif "password" not in content.keys():
-            error_message = "Missing password"
-        else:
-            user = User(**content)
-            storage.new(user)
-            storage.save()
-            response = jsonify(user.to_dict())
-            response.status_code = 201
-            return response
-    else:
-        error_message = "Not a JSON"
-    response = jsonify({"error": error_message})
-    response.status_code = 400
-    return response
+    if not request.get_json():
+        return make_response(jsonify({'error': 'Not a JSON'}), 400)
+    if 'email' not in request.get_json():
+        return make_response(jsonify({'error': 'Missing email'}), 400)
+    if 'password' not in request.get_json():
+        return make_response(jsonify({'error': 'Missing password'}), 400)
+    user = User(**request.get_json())
+    user.save()
+    return make_response(jsonify(user.to_dict()), 201)
 
 
 @app_views.route('/users/<user_id>/', methods=['PUT'], strict_slashes=False)
