@@ -32,7 +32,7 @@ def get_city(city_id):
 
 @app_views.route('/api/v1/cities/<city_id>', methods=['DELETE'])
 def delete_city(city_id):
-    city = storage.get(City, city_id)
+    city = storage.get("City", city_id)
     if not city:
         abort(404)
     storage.delete(city)
