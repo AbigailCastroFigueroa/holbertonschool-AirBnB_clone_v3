@@ -78,7 +78,7 @@ def update_place(place_id):
     if not place:
         abort(404)
     if not request.is_json:
-        abort(400, 'Not a JSON') 
+        abort(400, 'Not a JSON')
     if place:
         content = request.get_json(silent=True)
         if type(content) is dict:
