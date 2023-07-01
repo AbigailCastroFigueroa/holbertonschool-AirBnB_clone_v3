@@ -45,44 +45,44 @@ def delete_review(review_id):
     return jsonify({}), 200
 
 
-# @app_views.route('/places/<place_id>/reviews', methods=['POST'],
-#                  strict_slashes=False)
-# def post_review(place_id):
-#     """Add a review to a given place."""
-#     requested_data = request.get_json()
-#     place = storage.get(Place, place_id)
-#     user_id = requested_data['user_id']
-#     correct_user = storage.get(User, user_id)
-#     if not place:
-#         abort(404)
-#     if not requested_data:
-#         abort(400, 'Not a JSON')
-#     if not user_id:
-#         abort(400, 'Missing user_id')
-#     if not correct_user:
-#         abort(404)
-#     if "text" not in requested_data:
-#         abort(400, 'Missing text')
-#     new_review = Review(**requested_data)
-#     new_review.place_id = place_id
-#     storage.new(new_review)
-#     storage.save()
-#     return jsonify(new_review), 201
+@app_views.route('/places/<place_id>/reviews', methods=['POST'],
+                 strict_slashes=False)
+def post_review(place_id):
+    """Add a review to a given place."""
+    requested_data = request.get_json()
+    place = storage.get(Place, place_id)
+    user_id = requested_data['user_id']
+    correct_user = storage.get(User, user_id)
+    if not place:
+        abort(404)
+    if not requested_data:
+        abort(400, 'Not a JSON')
+    if not user_id:
+        abort(400, 'Missing user_id')
+    if not correct_user:
+        abort(404)
+    if "text" not in requested_data:
+        abort(400, 'Missing text')
+    new_review = Review(**requested_data)
+    new_review.place_id = place_id
+    storage.new(new_review)
+    storage.save()
+    return jsonify(new_review), 201
 
 
-# @app_views.route('/reviews/<review_id>', methods=['PUT'],
-#                  strict_slashes=False)
-# def update_review(review_id):
-#     """Update or alter information of the review."""
-#     review = storage.get(Review, review_id)
-#     requested_data = request.get_json()
-#     KeysToIgnore = ["id", "user_id", "place_id", "created_at",
-#                     "updated_at"]
-#     if not review:
-#         abort(404)
-#     if not requested_data:
-#         abort(400, 'Not a JSON')
-#     for key, value in requested_data.items():
-#         if key not in KeysToIgnore:
-#             setattr(review, key, value)
-#     return jsonify(review), 200
+@app_views.route('/reviews/<review_id>', methods=['PUT'],
+                 strict_slashes=False)
+def update_review(review_id):
+    """Update or alter information of the review."""
+    review = storage.get(Review, review_id)
+    requested_data = request.get_json()
+    KeysToIgnore = ["id", "user_id", "place_id", "created_at",
+                    "updated_at"]
+    if not review:
+        abort(404)
+    if not requested_data:
+        abort(400, 'Not a JSON')
+    for key, value in requested_data.items():
+        if key not in KeysToIgnore:
+            setattr(review, key, value)
+    return jsonify(review), 200
