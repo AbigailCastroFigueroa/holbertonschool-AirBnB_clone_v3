@@ -18,7 +18,7 @@ def search_place_review(place_id):
     if not selected_place:
         abort(404)
     list_of_reviews = []
-    for review in selected_place.reviews.values():
+    for review in selected_place.reviews:
         list_of_reviews.append(review.to_dict())
     return jsonify(list_of_reviews)
 
