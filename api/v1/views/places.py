@@ -56,7 +56,7 @@ def create_place(city_id):
     if 'user_id' not in request.get_json():
         return make_response(jsonify({'error': "Missing user_id"}), 400)
     city = storage.get(City, city_id)
-    if not city or not user:
+    if not city:
         abort(404)
     if city:
         content = request.get_json(silent=True)
@@ -72,6 +72,8 @@ def create_place(city_id):
                         response = jsonify(place.to_dict())
                         response.status_code = 201
                         return response
+                else:
+                    abort(404)
 
 
 @app_views.route('/places/<place_id>', methods=['PUT'], strict_slashes=False)
