@@ -5,6 +5,7 @@ from flask import jsonify, request, abort, make_response
 from api.v1.views import app_views
 from models.place import Place
 from models.city import City
+from models.user import User
 
 
 @app_views.route(
@@ -59,7 +60,7 @@ def create_place(city_id):
         content = request.get_json(silent=True)
         if type(content) is dict:
             if "user_id" in content.keys():
-                user = storage.get('User', content['user_id'])
+                user = storage.get(User, content['user_id'])
                 if user:
                     if "name" in content.keys():
                         place = Place(**content)
