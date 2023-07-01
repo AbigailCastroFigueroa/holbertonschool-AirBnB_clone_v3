@@ -16,6 +16,7 @@ import json
 import os
 import pep8
 import unittest
+from models.file_storage import FileStorage
 
 FileStorage = file_storage.FileStorage
 classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
@@ -112,3 +113,83 @@ class TestFileStorage(unittest.TestCase):
         with open("file.json", "r") as f:
             js = f.read()
         self.assertEqual(json.loads(string), json.loads(js))
+
+
+class TestFileStorage_other(unittest.TestCase):
+    def setUp(self):
+        self.storage = FileStorage()
+
+    def tearDown(self):
+        self.storage.delete()
+
+    def test_all_with_no_arguments(self):
+        # Positive test case
+        self.assertEqual(self.storage.all(),
+                         self.storage._FileStorage__objects)
+
+    def test_all_with_class_argument(self):
+        # Positive test case
+        self.storage.new(BaseModel())
+        self.storage.new(User())
+        self.assertEqual(self.storage.all(BaseModel),
+                         {"BaseModel.1": BaseModel()})
+        self.assertEqual(self.storage.all(User), {"User.2": User()})
+        # Negative test case
+        self.assertEqual(self.storage.all(str), {})
+
+    def test_new(self):
+        # Positive test case
+        obj = BaseModel()
+        self.storage.new(obj)
+        self.assertEqual(self.storage.all(BaseModel), {"BaseModel.1": obj})
+
+    def test_save(self):
+        # Positive test case
+        obj = BaseModel()
+        self.storage.new(obj)
+        self.storage.save()
+        with open(self.storage._FileStorage__file_path, 'r') as f:
+            data = json.load(f)
+        self.assertEqual(data, {"BaseModel.1": obj.to_dict()})
+
+    def test_reload(self):
+        # Positive test case
+        obj = BaseModel()
+        self.storage.new(obj)
+        self.storage.save()
+        self.storage.reload()
+        self.assertEqual(self.storage.all(BaseModel), {"BaseModel.1": obj})
+        # Negative test case
+        with open(self.storage._FileStorage__file_path, 'w') as f:
+            f.write("invalid json")
+        self.storage.reload()
+        self.assertEqual(self.storage.all(), {})
+
+    def test_delete(self):
+        # Positive test case
+        obj = BaseModel()
+        self.storage.new(obj)
+        self.storage.delete(obj)
+        self.assertEqual(self.storage.all(), {})
+
+    def test_get(self):
+        # Positive test case
+        obj = BaseModel()
+        self.storage.new(obj)
+        self.assertEqual(self.storage.get(BaseModel, obj.id), obj)
+        # Negative test case
+        self.assertIsNone(self.storage.get(BaseModel, "invalid_id"))
+
+    def test_count(self):
+        # Positive test case
+        obj1 = BaseModel()
+        obj2 = BaseModel()
+        self.storage.new(obj1)
+        self.storage.new(obj2)
+        self.assertEqual(self.storage.count(BaseModel), 2)
+        # Negative test case
+        self.assertEqual(self.storage.count(User), 0)
+
+
+if __name__ == '__main__':
+    unittest.main()
