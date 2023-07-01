@@ -16,6 +16,7 @@ import json
 import pep8
 import os
 import unittest
+from models import storage
 
 DBStorage = db_storage.DBStorage
 classes = {"Amenity": Amenity, "City": City, "Place": Place,
@@ -85,3 +86,61 @@ class TestFileStorage(unittest.TestCase):
     @unittest.skipIf(models.storage_t != 'db', "not testing db storage")
     def test_save(self):
         """Test that save properly saves objects to file.json."""
+
+
+class TestDBStorage(unittest.TestCase):
+    """Test the DBStorage class."""
+    def setUp(self):
+        """Set up for the tests"""
+        self.state = State(name="California")
+        storage.new(self.state)
+        storage.save()
+
+    def test_all(self):
+        """Test the all method"""
+        objects = storage.all(State)
+        self.assertIn("State." + self.state.id, objects.keys())
+
+    def test_new(self):
+        """Test the new method"""
+        new_state = State(name="Nevada")
+        storage.new(new_state)
+        storage.save()
+        self.assertIn(new_state, storage.all(State).values())
+
+    def test_save(self):
+        """Test the save method"""
+        self.state.name = "Arizona"
+        storage.save()
+        updated_state = storage.get(State, self.state.id)
+        self.assertEqual(self.state.name, updated_state.name)
+
+    def test_delete(self):
+        """Test the delete method"""
+        storage.delete(self.state)
+        self.assertNotIn(self.state, storage.all(State).values())
+
+    def test_reload(self):
+        """Test the reload method"""
+        self.state.name = "Texas"
+        storage.reload()
+        reloaded_state = storage.get(State, self.state.id)
+        self.assertNotEqual(self.state.name, reloaded_state.name)
+
+    def test_get(self):
+        """Test the get method"""
+        self.assertEqual(self.state, storage.get(State, self.state.id))
+        self.assertIsNone(storage.get(State, "fake_id"))
+
+    def test_count(self):
+        """Test the count method"""
+        count = storage.count(State)
+        self.assertEqual(len(storage.all(State)), count)
+
+    def tearDown(self):
+        """Tear down for the tests"""
+        storage.delete(self.state)
+        storage.save()
+
+    if __name__ == '__main__':
+        unittest.main()
